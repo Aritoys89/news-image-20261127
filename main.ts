@@ -372,12 +372,17 @@ function drawBody(cv, str, x, topY, size, col, maxW, lineGap = 1.5, weight = 0.9
 
 // Headline with automatic shrink-to-fit. lines: array of strings.
 // Returns y below the block.
+// Display tracking, in font units: a bold stroke is weight*1.55 units wide and
+// eats the glyphs' thin side bearings, so headline text needs extra letter
+// advance or adjacent glyphs merge. Tracking scales with the fitted size.
 function drawHeadline(cv, lines, x, topY, size, col, maxW, weight = 1.8, lineGap = 1.16, align = 'left') {
+  const trackingU = weight * 1.55 - 0.15;
   let s = size;
-  while (s > 8 && lines.some((ln) => textWidth(ln, s) > maxW)) s -= 1;
+  while (s > 8 && lines.some((ln) => textWidth(ln, s, (trackingU * s) / 14) > maxW)) s -= 1;
+  const trk = (trackingU * s) / 14;
   let base = topY + s;
   for (const ln of lines) {
-    drawText(cv, ln, align === 'center' ? x + maxW / 2 : x, base, s, col, weight, align);
+    drawText(cv, ln, align === 'center' ? x + maxW / 2 : x, base, s, col, weight, align, trk);
     base += s * lineGap;
   }
   return base - s * lineGap + s * 0.3;
@@ -515,7 +520,7 @@ function drawSyringeIcon(cv, x, y, w) {
 function rule(cv, x, y, w, col = INK, hgt = 2.4) { cv.rect(x, y, w, hgt, col); }
 
 function kicker(cv, text, x, y, size = 14.5) {
-  drawText(cv, text, x, y, size, RED, 1.75, 'left', 1.2);
+  drawText(cv, text, x, y, size, RED, 1.75, 'left', 2.3);
 }
 
 function buildPage() {
@@ -534,20 +539,20 @@ function buildPage() {
   // ---- masthead ----
   drawText(cv, 'EST. 2026 — INDEPENDENT', M + 2, 56, 11.5, SOFT, 1.1, 'left', 1);
   drawText(cv, 'ONE PAGE · THE WHOLE WORLD', W - M - 2, 56, 11.5, SOFT, 1.1, 'right', 1);
-  drawText(cv, 'THE DAILY COMPASS', W / 2, 128, 64, INK, 2.0, 'center', 1.5);
+  drawText(cv, 'THE DAILY COMPASS', W / 2, 128, 62, INK, 2.0, 'center', 11);
   drawText(cv, 'ALL THE WORLD’S NEWS, SUMMED UP ON A SINGLE PAGE', W / 2, 156, 13, SOFT, 1.15, 'center', 2.2);
 
   // ---- date bar ----
   cv.rect(M, 168, RW, 38, INK);
   drawText(cv, 'LATE EDITION', M + 14, 193, 12.5, WHITE, 1.2, 'left', 1);
-  drawText(cv, 'FRIDAY · 27 NOVEMBER 2026', W / 2, 195, 23, WHITE, 1.9, 'center', 2);
+  drawText(cv, 'FRIDAY · 27 NOVEMBER 2026', W / 2, 195, 23, WHITE, 1.9, 'center', 3.9);
   drawText(cv, 'No. 27', W - M - 14, 193, 12.5, WHITE, 1.2, 'right', 1);
 
   // ---- lead story: Kuwait drone strike ----
   kicker(cv, 'MIDDLE EAST · KUWAIT', M + 2, 230);
   let y = drawHeadline(cv,
     ['DRONE STRIKE KILLS TWO ITALIANS', 'AT KUWAIT AIR-DEFENCE STATION'],
-    M + 2, 238, 43, INK, RW - 4, 1.9);
+    M + 2, 238, 43, INK, RW - 4, 1.9, 1.27);
   drawText(cv, 'Rome and Kuwait City blame Iran. Tehran denies any role and offers a joint inquiry.',
     M + 2, y + 20, 15.5, SOFT, 1.0);
   const leadTop = y + 32;
