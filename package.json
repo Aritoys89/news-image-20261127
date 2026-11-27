@@ -1,0 +1,1 @@
+{"description":"A 1024x1024 newspaper front page for Friday 27 November 2026, drawn entirely in code (own rasteriser, own stroke typeface, own PNG encoder). Entry for make.fun's news-image-20261127 bounty.","name":"news-image-20261127","private":true,"scripts":{"start":"node main.ts"},"type":"module"}
